@@ -4,55 +4,138 @@
     <head>
         <title>Counter</title>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+        <meta name="author" content="samely" />
+        <link rel="stylesheet" type="text/css" href="css/style.css" /> 
+        <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+        <script>
+            $(function () {
+                $('#txtFromDate').datepicker({
+                    dateFormat: 'yy-mm-dd',
+                    inline: true,
+                    onSelect: function () {
+                        var fromDate = $(this).datepicker('getDate');
+                        var fromDayVar = fromDate.getUTCDate();
+                        document.getElementById('fromDay').innerHTML = "</br> from day: " + fromDayVar + "</br>";
+
+                    }
+                });
+                $('#txtDateTo').datepicker({dateFormat: 'yy-mm-dd',
+                    inline: true,
+                    onSelect: function () {
+                        var toDate = $(this).datepicker('getDate');
+                        var toDayVar = toDate.getUTCDate();
+                        document.getElementById('toDay').innerHTML = "</br> to day: " + toDayVar + "</br>";
+                    }
+                });
+            });
+        </script>
 
         <script>
             function count() {
-                var com = null;
-                com = document.getElementById('txtComment').value;
-
+                var comment = null;
+                var user = null;
+                var fromDate = null;
+                var toDate = null;
+                var url = null;
+                comment = document.getElementById('txtComment').value;
+                user = document.getElementById('txtUser').value;
+                fromDate = document.getElementById('txtFromDate').value;
+                toDate = document.getElementById('txtDateTo').value;
                 var x = new XMLHttpRequest();
                 x.onreadystatechange = function () {
                     if (x.readyState == 4 && x.status == 200) {
-                        myFunction(x);
+                        countingFunction(x);
                     }
                 };
 
-                x.open("GET", "https://api.openstreetmap.org/api/0.6/changesets?display_name=samely&time=2016-04-30T01%3A33%3A18Z", true);
-                x.send();
+                //url = "https://api.openstreetmap.org/api/0.6/changesets?display_name=samely&time=2016-04-30T01%3A33%3A18Z"
+                if (fromDate === toDate) {
+                    url = "https://api.openstreetmap.org/api/0.6/changesets?display_name=" + user + "&time=" + fromDate + "T00:00:00Z";
+                } else {
+                    url = "https://api.openstreetmap.org/api/0.6/changesets?display_name=" + user + "&time=" + fromDate + "T00:00:00Z," + toDate + "T11:59:59Z";
+                }
 
-                function myFunction(xml) {
+                x.open("GET", url, true);
+                x.send();
+                function countingFunction(xml) {
                     var x, i, xmlDoc, txt, c;
                     xmlDoc = xml.responseXML;
                     txt = "";
                     c = 0;
+                    x = xmlDoc.getElementsByTagName('changeset');
+                    document.getElementById('Totalcount').innerHTML = "</br> Total count: " + x.length + "</br>";
 
-                    x = xmlDoc.getElementsByTagName('tag');
                     for (i = 0; i < x.length; i++) {
                         if (x[i].getAttribute('k') === 'comment') {
-
-                            //txt = x[i].getAttribute('v') + "<br>";
-                            //document.write(txt);
-
-                            if (x[i].getAttribute('v').includes(com)) {
+                            if (x[i].getAttribute('v').includes(comment)) {
                                 c++;
                             }
                         }
                     }
-                    
-                    document.getElementById('countingInfo').innerHTML = "</br> Number of changesets: "+c+"</br>";
+
+                    for (day = fromDayVar; day <= toDayVar; day++) {
+                        for (hour = 0; hour < 24; hour++) {
+                            for (min = 0; min < 60; min++) {
+                                for (sec = 0; sec < 60; sec++) {
+
+                                }
+                            }
+                        }
+
+                    }
+
+                    var m = 0;
+                    for (day = fromDayVar; day <= toDayVar; day++) {
+                        m++;
+                    }
+                    document.getElementById('tryIterator').innerHTML = "</br> iterador " + m + "</br>";
+
+
+                    document.getElementById('countingInfo').innerHTML = "</br> Number of changesets: " + c + "</br>";
+                    document.getElementById('printURL').innerHTML = "</br> URL: " + url + "</br>";
                 }
             }
         </script>    
     </head>
-    <body>  
+    <body> 
+        <header><h1>Changeset Comment Counter</h1></header>
         <div>
-            <input type="text" id="txtComment" name="txtComment" required placeholder="Comment for searching"/>
-            <button type="button" id="btnCount" onclick="count()">Count!</button>
+            <form>
+                <p>
+                    <label >From Date:</label> 
+                    <input  type="text" id="txtFromDate" name="txtFromDate" required="required" placeholder="yy-mm-dd"/>    
+                </p>
+                <p>
+                    <label >To Date:</label> 
+                    <input  type="text" id="txtDateTo" name="txtDateTo" required="required"  placeholder="yy-mm-dd">   
+                </p>
+                <p>
+                    <label >User:</label> 
+                    <input type="text" id="txtUser" name="txtUser" required placeholder="User"/>
+                </p>
+                <p>
+                    <label >Comment:</label> 
+                    <input type="text" id="txtComment" name="txtComment" required placeholder="Comment for searching"/>
+                </p>
+            </form>
+
+            <p> 
+                <button type="button" id="btnCount" onclick="count()">Count!</button>
+            </p>
+            <div id="countingInfo"></div>
+            <div id="printURL"></div>
+            <div id="Totalcount"></div>
+            <div id="TotalPerDay"></div>  
+            <div id="fromDay"></div>  
+            <div id="toDay"></div> 
+            <div id="tryIterator"></div> 
+
         </div>
 
-        <div id="countingInfo">
 
-        </div>
     </body>
 </html>
