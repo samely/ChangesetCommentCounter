@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
     <head>
         <title>Counter</title>
@@ -12,62 +11,91 @@
         <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 
         <script>
+            //Get date from datepicker
+            var fromDate = new Date();
+            var toDate = new Date();
             $(function () {
                 $('#txtFromDate').datepicker({
                     dateFormat: 'yy-mm-dd',
                     inline: true,
                     onSelect: function () {
-                        var fromDate = $(this).datepicker('getDate');
-                        var fromDayVar = fromDate.getUTCDate();
-                        document.getElementById('fromDay').innerHTML = "</br> from day: " + fromDayVar + "</br>";
-
+                        fromDate = $(this).datepicker('getDate');
+                        //var fromDayVar = fromDate.getUTCDate();
+                        document.getElementById('fromDay').innerHTML = "</br> from day: " + fromDate.getUTCDate() + "</br>";
                     }
                 });
+
                 $('#txtDateTo').datepicker({dateFormat: 'yy-mm-dd',
                     inline: true,
                     onSelect: function () {
-                        var toDate = $(this).datepicker('getDate');
-                        var toDayVar = toDate.getUTCDate();
-                        document.getElementById('toDay').innerHTML = "</br> to day: " + toDayVar + "</br>";
+                        toDate = $(this).datepicker('getDate');
+                        //var toDayVar = toDate.getUTCDate();
+                        document.getElementById('toDay').innerHTML = "</br> to day: " + toDate.getUTCDate() + "</br>";
                     }
                 });
             });
-        </script>
 
-        <script>
             function count() {
                 var comment = null;
                 var user = null;
-                var fromDate = null;
-                var toDate = null;
+                var txtfromDate = null;
+                var txttoDate = null;
                 var url = null;
                 comment = document.getElementById('txtComment').value;
                 user = document.getElementById('txtUser').value;
-                fromDate = document.getElementById('txtFromDate').value;
-                toDate = document.getElementById('txtDateTo').value;
+                txtfromDate = document.getElementById('txtFromDate').value;
+                txttoDate = document.getElementById('txtDateTo').value;
+
+                var urlList = new Array();
+                var m = 0;
+                var c = 0;
+                var j;
+                if (fromDate.getYear() === toDate.getYear()) {
+                    if (fromDate.getMonth() === toDate.getMonth()) {
+                        if (fromDate.getDay() <= toDate.getDay()) {
+                            for (day = fromDate.getDay(); day <= toDate.getDay(); day++) {
+                                for (hour = 0; hour < 24; hour++) {
+                                    for (min = 0; min < 60; min++) {
+                                        for (sec = 0; sec < 60; sec++) {
+                                            url = "https://api.openstreetmap.org/api/0.6/changesets?display_name=" + user + "&time=" +
+                                                    txtfromDate + "T" + (hour > 9 ? hour : "0" + hour) + ":" + (min ? min : "0" + min) + ":" + (sec ? sec : "0" + sec) + "Z";
+                                            urlList.push(url);
+                                            m++;
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+                document.getElementById('tryIterator').innerHTML = "</br> Esto son todos los changesets en las fechas " + m + " ademas " + urlList.length + "</br>";
+
+
                 var x = new XMLHttpRequest();
                 x.onreadystatechange = function () {
                     if (x.readyState == 4 && x.status == 200) {
-                        countingFunction(x);
+                        for (j = 0; j < urlList.length; j++) {
+                            url = urlList[j];
+                            countingFunction(x);
+
+                        }
                     }
                 };
 
-                //url = "https://api.openstreetmap.org/api/0.6/changesets?display_name=samely&time=2016-04-30T01%3A33%3A18Z"
-                if (fromDate === toDate) {
-                    url = "https://api.openstreetmap.org/api/0.6/changesets?display_name=" + user + "&time=" + fromDate + "T00:00:00Z";
-                } else {
-                    url = "https://api.openstreetmap.org/api/0.6/changesets?display_name=" + user + "&time=" + fromDate + "T00:00:00Z," + toDate + "T11:59:59Z";
-                }
+                document.getElementById('printURL').innerHTML = "</br> url: " + urlList[0] + "</br>";
 
                 x.open("GET", url, true);
                 x.send();
+
+
                 function countingFunction(xml) {
                     var x, i, xmlDoc, txt, c;
                     xmlDoc = xml.responseXML;
                     txt = "";
-                    c = 0;
+
                     x = xmlDoc.getElementsByTagName('changeset');
-                    document.getElementById('Totalcount').innerHTML = "</br> Total count: " + x.length + "</br>";
+                    //document.getElementById('Totalcount').innerHTML = "</br> Total count: " + x.length + "</br>";
 
                     for (i = 0; i < x.length; i++) {
                         if (x[i].getAttribute('k') === 'comment') {
@@ -76,28 +104,8 @@
                             }
                         }
                     }
-
-                    for (day = fromDayVar; day <= toDayVar; day++) {
-                        for (hour = 0; hour < 24; hour++) {
-                            for (min = 0; min < 60; min++) {
-                                for (sec = 0; sec < 60; sec++) {
-
-                                }
-                            }
-                        }
-
-                    }
-
-                    var m = 0;
-                    for (day = fromDayVar; day <= toDayVar; day++) {
-                        m++;
-                    }
-                    document.getElementById('tryIterator').innerHTML = "</br> iterador " + m + "</br>";
-
-
-                    document.getElementById('countingInfo').innerHTML = "</br> Number of changesets: " + c + "</br>";
-                    document.getElementById('printURL').innerHTML = "</br> URL: " + url + "</br>";
                 }
+                document.getElementById('countingInfo').innerHTML = "</br> Number of changesets: " + c + "</br>";
             }
         </script>    
     </head>
