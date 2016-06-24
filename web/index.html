@@ -50,23 +50,23 @@
 
                 //url:https://api.openstreetmap.org/api/0.6/changesets?display_name=samely&time=2016-05-02T17:50:00Z,2016-05-02T18:00:00Z
                 for (minute = 0; minute < 59; minute++) {
-                    if (minute===15||minute===30||minute===45){
+                    //if (minute===5||minute===10||minute===15||minute===20||minute===25||minute===30||minute===35||minute===40||minute===45||minute===50||minute===55){
                         url = "https://api.openstreetmap.org/api/0.6/changesets?display_name=" + user + "&time=" +
                                 fromDate + "T18:" + ("0" + minute).slice(-2) + ":00Z," +
                                 toDate + "T18:" + ("0" + (minute + 1)).slice(-2) + ":59Z";
                         listUrl.push(url);
                         test = test.concat(url);
-                        if (minute === 45) {
+                        if (minute === 55) {
                             url = "https://api.openstreetmap.org/api/0.6/changesets?display_name=" + user + "&time=" +
-                                    fromDate + "T18:45:00Z," + toDate + "T18:59:59Z";
+                                    fromDate + "T18:55:00Z," + toDate + "T18:59:59Z";
                             listUrl.push(url);
                             test = test.concat(url);
                         }
-                    }
+                    //}
                 }
 
                 document.getElementById('printURL').innerHTML = "</br> URL: " + test + "</br>";
-                /*
+                
                  var c = 0;
                  var listId = [];
                  var child = "";
@@ -110,7 +110,7 @@
                  var num = remove_duplicates_safe(listId).length;
                  
                  document.getElementById('countingInfo').innerHTML = "</br> Number of changesets: " + num + "</br>";
-                 */
+                 
             }
         </script>    
     </head>
