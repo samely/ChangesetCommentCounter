@@ -50,41 +50,67 @@
 
                 //url:https://api.openstreetmap.org/api/0.6/changesets?display_name=samely&time=2016-05-02T17:50:00Z,2016-05-02T18:00:00Z
                 for (minute = 0; minute < 59; minute++) {
-                    url = "https://api.openstreetmap.org/api/0.6/changesets?display_name=" + user + "&time=" +
-                            fromDate + "T18:" + ("0" + minute).slice(-2) + ":00Z," +
-                            toDate + "T18:" + ("0" + (minute + 1)).slice(-2) + ":59Z";
-                    listUrl.push(url);
-                    test = test.concat(url);
-
+                    if (minute===15||minute===30||minute===45){
+                        url = "https://api.openstreetmap.org/api/0.6/changesets?display_name=" + user + "&time=" +
+                                fromDate + "T18:" + ("0" + minute).slice(-2) + ":00Z," +
+                                toDate + "T18:" + ("0" + (minute + 1)).slice(-2) + ":59Z";
+                        listUrl.push(url);
+                        test = test.concat(url);
+                        if (minute === 45) {
+                            url = "https://api.openstreetmap.org/api/0.6/changesets?display_name=" + user + "&time=" +
+                                    fromDate + "T18:45:00Z," + toDate + "T18:59:59Z";
+                            listUrl.push(url);
+                            test = test.concat(url);
+                        }
+                    }
                 }
 
                 document.getElementById('printURL').innerHTML = "</br> URL: " + test + "</br>";
-
-                var c = 0;
-
-                for (u = 0; u < listUrl.length; u++) {                 
-                    var m, i, xmlDoc;
-                    var x = new XMLHttpRequest();
-                    x.open("GET", listUrl[u], false);
-
-                    x.onreadystatechange = function () {
-                        if (x.readyState == 4 && x.status == 200) {
-                            xmlDoc = x.responseXML;
-                            m = xmlDoc.getElementsByTagName('tag');
-
-                            for (i = 0; i < m.length; i++) {
-                                if (m[i].getAttribute('k') === 'comment') {
-                                    if (m[i].getAttribute('v').includes(comment)) {
-                                        c++;
-                                    }
-                                }
-                            }
-                        }
-                    };
-                    x.send();                   
-                }
-
-                document.getElementById('countingInfo').innerHTML = "</br> Number of changesets: " + c + "</br>";
+                /*
+                 var c = 0;
+                 var listId = [];
+                 var child = "";
+                 
+                 for (u = 0; u < listUrl.length; u++) {
+                 
+                 var m, i, y, xmlDoc;
+                 var x = new XMLHttpRequest();
+                 x.open("GET", listUrl[u], false);
+                 
+                 x.onreadystatechange = function () {
+                 if (x.readyState == 4 && x.status == 200) {
+                 xmlDoc = x.responseXML;
+                 m = xmlDoc.getElementsByTagName('tag');
+                 
+                 for (i = 0; i < m.length; i++) {
+                 if (m[i].getAttribute('k') === 'comment') {
+                 if (m[i].getAttribute('v').includes(comment)) {
+                 listId.push(m[i].parentNode.getAttribute('id'));
+                 child = child.concat(m[i].parentNode.getAttribute('id'));
+                 c++;
+                 }
+                 }
+                 }
+                 }
+                 };
+                 x.send();
+                 }
+                 
+                 function remove_duplicates_safe(arr) {
+                 var obj = {};
+                 var arr2 = [];
+                 for (var i = 0; i < arr.length; i++) {
+                 if (!(arr[i] in obj)) {
+                 arr2.push(arr[i]);
+                 obj[arr[i]] = true;
+                 }
+                 }
+                 return arr2;
+                 }
+                 var num = remove_duplicates_safe(listId).length;
+                 
+                 document.getElementById('countingInfo').innerHTML = "</br> Number of changesets: " + num + "</br>";
+                 */
             }
         </script>    
     </head>
