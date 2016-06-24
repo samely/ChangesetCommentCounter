@@ -11,100 +11,79 @@
         <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 
         <script>
-            //Get date from datepicker
-            var fromDate = new Date();
-            var toDate = new Date();
+            //Fill date data
             $(function () {
                 $('#txtFromDate').datepicker({
                     dateFormat: 'yy-mm-dd',
                     inline: true,
                     onSelect: function () {
-                        fromDate = $(this).datepicker('getDate');
-                        //var fromDayVar = fromDate.getUTCDate();
-                        document.getElementById('fromDay').innerHTML = "</br> from day: " + fromDate.getUTCDate() + "</br>";
+                        var fromDate = $(this).datepicker('getDate');
+                        var fromDayVar = fromDate.getUTCDate();
+                        //document.getElementById('fromDay').innerHTML = "</br> from day: " + fromDayVar + "</br>";
                     }
                 });
-
                 $('#txtDateTo').datepicker({dateFormat: 'yy-mm-dd',
                     inline: true,
                     onSelect: function () {
-                        toDate = $(this).datepicker('getDate');
-                        //var toDayVar = toDate.getUTCDate();
-                        document.getElementById('toDay').innerHTML = "</br> to day: " + toDate.getUTCDate() + "</br>";
+                        var toDate = $(this).datepicker('getDate');
+                        var toDayVar = toDate.getUTCDate();
+                        //document.getElementById('toDay').innerHTML = "</br> to day: " + toDayVar + "</br>";
                     }
                 });
             });
+        </script>
 
+        <script>
             function count() {
                 var comment = null;
                 var user = null;
-                var txtfromDate = null;
-                var txttoDate = null;
+                var fromDate = null;
+                var toDate = null;
                 var url = null;
                 comment = document.getElementById('txtComment').value;
                 user = document.getElementById('txtUser').value;
-                txtfromDate = document.getElementById('txtFromDate').value;
-                txttoDate = document.getElementById('txtDateTo').value;
+                fromDate = document.getElementById('txtFromDate').value;
+                toDate = document.getElementById('txtDateTo').value;
 
-                var urlList = new Array();
-                var m = 0;
+                var listUrl = [];
+                var test = "";
+
+                //url:https://api.openstreetmap.org/api/0.6/changesets?display_name=samely&time=2016-05-02T17:50:00Z,2016-05-02T18:00:00Z
+                for (minute = 0; minute < 59; minute++) {
+                    url = "https://api.openstreetmap.org/api/0.6/changesets?display_name=" + user + "&time=" +
+                            fromDate + "T18:" + ("0" + minute).slice(-2) + ":00Z," +
+                            toDate + "T18:" + ("0" + (minute + 1)).slice(-2) + ":59Z";
+                    listUrl.push(url);
+                    test = test.concat(url);
+
+                }
+
+                document.getElementById('printURL').innerHTML = "</br> URL: " + test + "</br>";
+
                 var c = 0;
-                var j;
-                if (fromDate.getYear() === toDate.getYear()) {
-                    if (fromDate.getMonth() === toDate.getMonth()) {
-                        if (fromDate.getDay() <= toDate.getDay()) {
-                            for (day = fromDate.getDay(); day <= toDate.getDay(); day++) {
-                                for (hour = 0; hour < 24; hour++) {
-                                    for (min = 0; min < 60; min++) {
-                                        for (sec = 0; sec < 60; sec++) {
-                                            url = "https://api.openstreetmap.org/api/0.6/changesets?display_name=" + user + "&time=" +
-                                                    txtfromDate + "T" + (hour > 9 ? hour : "0" + hour) + ":" + (min ? min : "0" + min) + ":" + (sec ? sec : "0" + sec) + "Z";
-                                            urlList.push(url);
-                                            m++;
-                                        }
+
+                for (u = 0; u < listUrl.length; u++) {                 
+                    var m, i, xmlDoc;
+                    var x = new XMLHttpRequest();
+                    x.open("GET", listUrl[u], false);
+
+                    x.onreadystatechange = function () {
+                        if (x.readyState == 4 && x.status == 200) {
+                            xmlDoc = x.responseXML;
+                            m = xmlDoc.getElementsByTagName('tag');
+
+                            for (i = 0; i < m.length; i++) {
+                                if (m[i].getAttribute('k') === 'comment') {
+                                    if (m[i].getAttribute('v').includes(comment)) {
+                                        c++;
                                     }
                                 }
                             }
-
                         }
-                    }
+                    };
+                    x.send();                   
                 }
-                document.getElementById('tryIterator').innerHTML = "</br> Esto son todos los changesets en las fechas " + m + " ademas " + urlList.length + "</br>";
 
-
-                var x = new XMLHttpRequest();
-                x.onreadystatechange = function () {
-                    if (x.readyState == 4 && x.status == 200) {
-                        for (j = 0; j < urlList.length; j++) {
-                            url = urlList[j];
-                            countingFunction(x);
-
-                        }
-                    }
-                };
-
-                document.getElementById('printURL').innerHTML = "</br> url: " + urlList[0] + "</br>";
-
-                x.open("GET", url, true);
-                x.send();
-
-
-                function countingFunction(xml) {
-                    var x, i, xmlDoc, txt, c;
-                    xmlDoc = xml.responseXML;
-                    txt = "";
-
-                    x = xmlDoc.getElementsByTagName('changeset');
-                    //document.getElementById('Totalcount').innerHTML = "</br> Total count: " + x.length + "</br>";
-
-                    for (i = 0; i < x.length; i++) {
-                        if (x[i].getAttribute('k') === 'comment') {
-                            if (x[i].getAttribute('v').includes(comment)) {
-                                c++;
-                            }
-                        }
-                    }
-                }
                 document.getElementById('countingInfo').innerHTML = "</br> Number of changesets: " + c + "</br>";
             }
         </script>    
